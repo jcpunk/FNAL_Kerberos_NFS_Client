@@ -13,131 +13,7 @@ What this means in practice: If two users login to one account
 one of those users will use the Kerberos Credentials of the other
 user for NFS access.  This is known as the shared accounts problem.
 
-=== Suggested Workflow for Shared Accounts ===
-
-With shared accounts there is the possibility of Kerberos NFS confusion
-as a user may end up with the incorrect principal used for NFS access.
-
-To mitigate this, we have a set of suggested methods for setting up shared
-accounts to access Kerberized NFS mounts.
-
-Following these guidelines will permit you to login with your Kerberos
-credentials, but use a specific set of credentials for the Kerberized
-NFS operations.
-
-==== Setup a HNAS Group ====
-
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-TODO:
-- Document HNAS groups
-
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-==== Setup a *client* keytab ====
-
-You will need to create a keytab specifically for this shared user.
-
-1. Request a new pricipal for your host from the Fermilab Service Desk
-   with the following format: +username/cron/host.domain@REALM+. +
-   +
-   For Example: +exampleuser/cron/testhost.fnal.gov@FNAL.GOV+
-
-2. Create your new client.keytab.
-
-TIP: Fermilab EL8 users can use +fermilab-util_kcron+ >= 1.4 to 
-     setup a client keytab in +/var/kerberos/krb5/user/$\{EUID}/client.keytab+
-
-TIP: Fermilab EL7 or later users can use this +makehostkeys+ command:
-     `makehostkeys -s exampleuser/cron -k ~/client.keytab`
-     to create a client.keytab in their home directory.
-
-==== Shared Account NFS Options ====
-
-A *Shared Account NFS* account is one in which multiple Kerberos
-identities are used when talking to the NFS server.  An account
-with a single user, but multiple Kerberos principals *is* a shared account.
-
-There are a few ways to setup the acquisition of Kerberos tokens
-for NFS accounts.
-
-* +gssproxy+
-* +~/.k5identity+
-
-The use of +gssproxy+ is generally reliable, but will require work from
-your systems administrator.  This is the suggested approach.
-
-The use of +~/.k5identity+ can be mostly done without any involvement
-of your systems administrator.  This may not work in all cases.
-
-===== Shared Account NFS Option 1 - Setup +gssproxy+ =====
-
-NOTE: Your System's Administrator will need to do this step for you.
-
-The exact name of your client keytab is system specific.
-
-It follows the pattern: +/var/lib/gssproxy/clients/$\{EUID}.keytab+
-
-By default gssproxy runs as +root+, thus the keytab file must be
-owned by +root+ and not readable to any other user.
-
-TIP: This process must be done on each system using the NFS share
-     for each shared user.
-
-===== Shared Account NFS Option 2 - Setup +~/.k5identity+ =====
-
-WARNING: This process will not work with Heimdal Kerberos < *8.0*
-
-WARNING: This process will not work with MIT Kerberos < *1.16*
-
-WARNING: This process will not work with +nfs-utils+ < *2.3.1*
-
-The exact name of your client keytab is system specific.
-
-It follows the pattern: +/var/kerberos/krb5/user/$\{EUID}/client.keytab+
-
-It must be owned by your user and not readable to any other user.
-
-TIP: This process must be done on each system using the NFS share
-     for each shared user.
-
-NOTE: Your System's Administrator may need to do this step for you on SL7.
-      Ensure ownership is correct and permissions on the keytab are +0600+.
-      You should set +/var/kerberos/krb5/user/$\{EUID}/+ to +0700+.
-
-The +~/.k5identity+ file for the shared account should contain
-the following lines customized to match your keytab created above:
-
---------------------------------------
-##
-# Mappings to use /var/kerberos/krb5/user/${EUID}/client.keytab
-##
-
-# static Kerberos mapping for homesrv01.fnal.gov's nfs shares
-exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=homesrv01.fnal.gov service=nfs
-
-# static Kerberos mapping for filesrv01.fnal.gov's nfs shares
-exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=filesrv01.fnal.gov service=nfs
-
-# static Kerberos mapping for filesrv-app.fnal.gov's nfs shares
-exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=filesrv-app.fnal.gov service=nfs
---------------------------------------
-
-*or* _if you are not using other Kerberized NFS principals_:
-
---------------------------------------
-##
-# Mappings to use /var/kerberos/krb5/user/${EUID}/client.keytab
-##
-
-# static Kerberos mapping for ALL nfs shares at fnal.gov
-exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=*.fnal.gov service=nfs
---------------------------------------
-
-NOTE: There is a known bug with EL8 where +~/.k5identity+ is not
-      reviewed by +gssproxy+ when doing credential delegation.
+For shared accounts please see the section on xref:_special_considerations[Special Considerations]
 
 == Required Client Software ==
 
@@ -347,6 +223,132 @@ filesrv01.fnal.gov:/SciSoft     /SciSoft        nfs    sec=krb5,nfsvers=4,proto=
 
 TIP: The initial mount may take some time as your system
      will be starting several background services.
+
+== Special Considerations ==
+
+With shared accounts there is the possibility of Kerberos NFS confusion
+as a user may end up with the incorrect principal used for NFS access.
+
+To mitigate this, we have a set of suggested methods for setting up shared
+accounts to access Kerberized NFS mounts.
+
+Following these guidelines will permit you to login with your Kerberos
+credentials, but use a specific set of credentials for the Kerberized
+NFS operations.
+
+=== Setup a HNAS Group ===
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+TODO:
+- Document HNAS groups
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+=== Setup a *client* keytab ===
+
+You will need to create a keytab specifically for this shared user.
+
+1. Request a new pricipal for your host from the Fermilab Service Desk
+   with the following format: +username/cron/host.domain@REALM+. +
+   +
+   For Example: +exampleuser/cron/testhost.fnal.gov@FNAL.GOV+
+
+2. Create your new client.keytab.
+
+TIP: Fermilab EL8 users can use +fermilab-util_kcron+ >= 1.4 to
+     setup a client keytab in +/var/kerberos/krb5/user/$\{EUID}/client.keytab+
+
+TIP: Fermilab EL7 or later users can use this +makehostkeys+ command:
+     `makehostkeys -s exampleuser/cron -k ~/client.keytab`
+     to create a client.keytab in their home directory.
+
+=== Shared Account NFS Options ===
+
+A *Shared Account NFS* account is one in which multiple Kerberos
+identities are used when talking to the NFS server.  An account
+with a single user, but multiple Kerberos principals *is* a shared account.
+
+There are a few ways to setup the acquisition of Kerberos tokens
+for NFS accounts.
+
+* +gssproxy+
+* +~/.k5identity+
+
+The use of +gssproxy+ is generally reliable, but will require work from
+your systems administrator.  This is the suggested approach.
+
+The use of +~/.k5identity+ can be mostly done without any involvement
+of your systems administrator.  This may not work in all cases.
+
+==== Shared Account NFS Option 1 - Setup +gssproxy+ ====
+
+NOTE: Your System's Administrator will need to do this step for you.
+
+The exact name of your client keytab is system specific.
+
+It follows the pattern: +/var/lib/gssproxy/clients/$\{EUID}.keytab+
+
+By default gssproxy runs as +root+, thus the keytab file must be
+owned by +root+ and not readable to any other user.
+
+TIP: This process must be done on each system using the NFS share
+     for each shared user.
+
+==== Shared Account NFS Option 2 - Setup +~/.k5identity+ ====
+
+WARNING: This process will not work with Heimdal Kerberos < *8.0*
+
+WARNING: This process will not work with MIT Kerberos < *1.16*
+
+WARNING: This process will not work with +nfs-utils+ < *2.3.1*
+
+The exact name of your client keytab is system specific.
+
+It follows the pattern: +/var/kerberos/krb5/user/$\{EUID}/client.keytab+
+
+It must be owned by your user and not readable to any other user.
+
+TIP: This process must be done on each system using the NFS share
+     for each shared user.
+
+NOTE: Your System's Administrator may need to do this step for you on SL7.
+      Ensure ownership is correct and permissions on the keytab are +0600+.
+      You should set +/var/kerberos/krb5/user/$\{EUID}/+ to +0700+.
+
+The +~/.k5identity+ file for the shared account should contain
+the following lines customized to match your keytab created above:
+
+--------------------------------------
+##
+# Mappings to use /var/kerberos/krb5/user/${EUID}/client.keytab
+##
+
+# static Kerberos mapping for homesrv01.fnal.gov's nfs shares
+exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=homesrv01.fnal.gov service=nfs
+
+# static Kerberos mapping for filesrv01.fnal.gov's nfs shares
+exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=filesrv01.fnal.gov service=nfs
+
+# static Kerberos mapping for filesrv-app.fnal.gov's nfs shares
+exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=filesrv-app.fnal.gov service=nfs
+--------------------------------------
+
+*or* _if you are not using other Kerberized NFS principals_:
+
+--------------------------------------
+##
+# Mappings to use /var/kerberos/krb5/user/${EUID}/client.keytab
+##
+
+# static Kerberos mapping for ALL nfs shares at fnal.gov
+exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=*.fnal.gov service=nfs
+--------------------------------------
+
+NOTE: There is a known bug with EL8 where +~/.k5identity+ is not
+      reviewed by +gssproxy+ when doing credential delegation.
 
 == Troubleshooting ==
 

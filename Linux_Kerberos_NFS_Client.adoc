@@ -237,6 +237,7 @@ and dedicated Kerberos identity.
 A *Shared Account NFS* account is one in which multiple Kerberos
 identities are used when talking to the NFS server.  If an account
 has a single User ID, but multiple Kerberos principals *is* a shared account.
+If you are using Overlay User IDs, those are considered a single shared account.
 
 Please read this entire section before beginning this process.
 

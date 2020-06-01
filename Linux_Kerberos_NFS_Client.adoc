@@ -273,14 +273,14 @@ You will need to create a keytab specifically for this shared user.
    +
    For Example: +exampleuser/cron/testhost.fnal.gov@FNAL.GOV+
 
-2. Create your new client.keytab.
+2. Create your new +client.keytab+.
 
 TIP: Fermilab EL8 users can use +fermilab-util_kcron+ >= 1.4 to
      setup a client keytab in +/var/kerberos/krb5/user/$\{EUID}/client.keytab+
 
 TIP: Fermilab EL7 or later users can use this +makehostkeys+ command:
      `makehostkeys -s exampleuser/cron -k ~/client.keytab`
-     to create a client.keytab in their home directory.
+     to create a +client.keytab+ in their home directory.
 
 === Shared Account NFS Options ===
 
@@ -292,7 +292,7 @@ created in the previous section.
 * +~/.k5identity+
 
 The use of +gssproxy+ is generally reliable, but will require work from
-your systems administrator.  This is the suggested approach.
+your systems administrator.  This +gssproxy+ is the suggested approach.
 
 The use of +~/.k5identity+ can be mostly done without any involvement
 of your systems administrator.  This may not work in all cases.

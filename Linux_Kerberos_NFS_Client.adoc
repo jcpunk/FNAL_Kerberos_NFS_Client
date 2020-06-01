@@ -1,0 +1,429 @@
+= How to Setup NFS with Kerberos on Linux =
+
+The following instructions cover use of NFS Clients on Linux with Kerberos.
+
+== Setup Considerations ==
+
+Kerberized NFS does not work well with shared accounts.
+
+WARNING: As of 2019, the Linux Kernel can only support a single session
+         of Kerberized NFS per UID.
+
+What this means in practice: If two users login to one account
+one of those users will use the Kerberos Credentials of the other
+user for NFS access.  This is known as the shared accounts problem.
+
+=== Suggested Workflow for Shared Accounts ===
+
+With shared accounts there is the possibility of Kerberos NFS confusion
+as a user may end up with the incorrect principal used for NFS access.
+
+To mitigate this, we have a set of suggested methods for setting up shared
+accounts to access Kerberized NFS mounts.
+
+Following these guidelines will permit you to login with your Kerberos
+credentials, but use a specific set of credentials for the Kerberized
+NFS operations.
+
+==== Setup a HNAS Group ====
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+TODO:
+- Document HNAS groups
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+==== Setup a *client* keytab ====
+
+You will need to create a keytab specifically for this shared user.
+
+1. Request a new pricipal for your host from the Fermilab Service Desk
+   with the following format: +username/cron/host.domain@REALM+. +
+   +
+   For Example: +exampleuser/cron/testhost.fnal.gov@FNAL.GOV+
+
+2. Create your new client.keytab.
+
+TIP: Fermilab EL8 users can use +fermilab-util_kcron+ >= 1.4 to 
+     setup a client keytab in +/var/kerberos/krb5/user/$\{EUID}/client.keytab+
+
+TIP: Fermilab EL7 or later users can use this +makehostkeys+ command:
+     `makehostkeys -s exampleuser/cron -k ~/client.keytab`
+     to create a client.keytab in their home directory.
+
+==== Shared Account NFS Options ====
+
+A *Shared Account NFS* account is one in which multiple Kerberos
+identities are used when talking to the NFS server.  An account
+with a single user, but multiple Kerberos principals *is* a shared account.
+
+There are a few ways to setup the acquisition of Kerberos tokens
+for NFS accounts.
+
+* +gssproxy+
+* +~/.k5identity+
+
+The use of +gssproxy+ is generally reliable, but will require work from
+your systems administrator.  This is the suggested approach.
+
+The use of +~/.k5identity+ can be mostly done without any involvement
+of your systems administrator.  This may not work in all cases.
+
+===== Shared Account NFS Option 1 - Setup +gssproxy+ =====
+
+NOTE: Your System's Administrator will need to do this step for you.
+
+The exact name of your client keytab is system specific.
+
+It follows the pattern: +/var/lib/gssproxy/clients/$\{EUID}.keytab+
+
+By default gssproxy runs as +root+, thus the keytab file must be
+owned by +root+ and not readable to any other user.
+
+TIP: This process must be done on each system using the NFS share
+     for each shared user.
+
+===== Shared Account NFS Option 2 - Setup +~/.k5identity+ =====
+
+WARNING: This process will not work with Heimdal Kerberos < *8.0*
+
+WARNING: This process will not work with MIT Kerberos < *1.16*
+
+WARNING: This process will not work with +nfs-utils+ < *2.3.1*
+
+The exact name of your client keytab is system specific.
+
+It follows the pattern: +/var/kerberos/krb5/user/$\{EUID}/client.keytab+
+
+It must be owned by your user and not readable to any other user.
+
+TIP: This process must be done on each system using the NFS share
+     for each shared user.
+
+NOTE: Your System's Administrator may need to do this step for you on SL7.
+      Ensure ownership is correct and permissions on the keytab are +0600+.
+      You should set +/var/kerberos/krb5/user/$\{EUID}/+ to +0700+.
+
+The +~/.k5identity+ file for the shared account should contain
+the following lines customized to match your keytab created above:
+
+--------------------------------------
+##
+# Mappings to use /var/kerberos/krb5/user/${EUID}/client.keytab
+##
+
+# static Kerberos mapping for homesrv01.fnal.gov's nfs shares
+exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=homesrv01.fnal.gov service=nfs
+
+# static Kerberos mapping for filesrv01.fnal.gov's nfs shares
+exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=filesrv01.fnal.gov service=nfs
+
+# static Kerberos mapping for filesrv-app.fnal.gov's nfs shares
+exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=filesrv-app.fnal.gov service=nfs
+--------------------------------------
+
+*or* _if you are not using other Kerberized NFS principals_:
+
+--------------------------------------
+##
+# Mappings to use /var/kerberos/krb5/user/${EUID}/client.keytab
+##
+
+# static Kerberos mapping for ALL nfs shares at fnal.gov
+exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=*.fnal.gov service=nfs
+--------------------------------------
+
+NOTE: There is a known bug with EL8 where +~/.k5identity+ is not
+      reviewed by +gssproxy+ when doing credential delegation.
+
+== Required Client Software ==
+
+You should always install all published security errata for your system.
+
+You must install some packages and enable a +systemd+ service for NFS
+Client services to work as expected.
+
+--------------------------------------
+sudo yum install nfs-utils krb5-workstation;
+sudo systemctl enable --now nfs-client.target;
+--------------------------------------
+
+NOTE: EL7 users you must have +nfs-utils+ >= 1.3.0-0.65
+      this updated package corrects a number of serious errors.
+
+NOTE: EL7 users you must have +gssproxy+ >= 0.7.0-28 
+      this updated package corrects a number of serious errors.
+
+NOTE: EL7 users you must have +krb5-libs+ >= 1.15.1-37
+      this updated package corrects a number of serious errors.
+
+NOTE: EL7 users you must have +systemd+ >= 219-67
+      this updated package corrects a number of serious errors.
+
+== Required Configuration Settings ==
+
+=== idmapd.conf ===
+
+The +libnfsidmap+ package provides +/etc/idmapd.conf+.
+
+This file controls how Kerberos identities are mapped to user identities.
+
+It is recommended that you make your +[General]+ section
+match the one provided below for best results.
+
+--------------------------------------------
+[General]
+Domain = fnal.gov
+Local-Realms = FNAL.GOV
+--------------------------------------------
+
+NOTE: You must restart the NFS services if you change this file.
+      `systemctl restart nfs-client.target` should be sufficient.
+
+NOTE: If your system is on site and has a hostname ending in +fnal.gov+,
+      then these settings are not required.  However, it is best practice
+      to set them.
+
+=== krb5.conf ===
+
+The +krb5-libs+ package provides +/etc/krb5.conf+.
+
+This file controls how Kerberos authentication functions on your system.
+
+TIP: Follow the official Fermilab guidence for setting up this file.
+
+NOTE: Linux systems should ensure that you do not have explicit mappings
+      for +homesrv01.fnal.gov+, +filesrv01.fnal.gov+, or +filesrv-app.fnal.gov+
+      to use the +FERMI.WIN.FNAL.GOV+ Kerberos domain in your Kerberos config.
+
+WARNING: Kerberos is a time sensitive protocol.  Your system must
+         have an active time synchronization service running for Kerberos
+         to work as expected.
+
+=== krb5.keytab ===
+
+Your Kerberos Keytab (+/etc/krb5.keytab+) is unique to your system
+and not provided by any system packages.
+
+WARNING: Your +/etc/krb5.keytab+ must be owned by the +root+ user and
+         not accessible to any other user or group.  Most Kerberos
+         applications will validate this before attempting to use
+         they keytab.
+
+NOTE: For SELinux systems, if your keytab is not physically located
+      in +/etc/krb5.keytab+ you must ensure it is accessible to
+      +rpc.gssd+.  A link from +/etc/krb5.keytab+ to the alternate
+      location is required.  The directory path must be something
+      it can traverse and the keytab itself must be of type +krb5_keytab_t+. +
+      +
+      Running `chcon -t krb5_keytab_t $(readlink -f /etc/krb5.keytab)`
+      once the link is in place *may* be sufficient.
+
+TIP: Fermilab users can utilize the `makehostkeys` script to generate
+     keytabs approved by the Fermilab Service Desk.
+
+==== krb5.keytab for NFS Clients ====
+
+Kerberos NFS Clients will require a +host/+ principal for access to
+Kerberized NFS shares.
+
+The traditional process for getting a Fermilab Keytab provides this.
+
+== Suggested Configuration Settings ==
+
+=== nfs.conf ===
+
+The +nfs-utils+ package provides +/etc/nfs.conf+.
+
+This file controls the settings of the NFS services.
+
+It is recommended that you make your +[gssd]+ section
+match the one provided below for best results.
+
+--------------------------------------------
+[gssd]
+use-memcache=yes
+use-gss-proxy=yes
+use-machine-creds=yes
+--------------------------------------------
+
+NOTE: `/etc/sysconfig/nfs` is deprecated.  Anything
+      you've set there should be moved to their new
+      locations in +/etc/nfs.conf+ or +/etc/modprobe.d/+.
+
+WARNING: The kernel cache of your Kerberos ticket
+         is not linked to your user space Kerberos
+         ticket.  See the xref:_troubleshooting[Troubleshooting]
+         section for more information.
+
+NOTE: For the +rpc.gssd+ daemon uses the system keytab (ie +/etc/krb5.keytab+)
+      to access the NFS share as user +root+.
+      *This makes the +root+ account a shared NFS account* if you
+      are going to access Kerberized NFS as +root+ using
+      an alternate principal - such as your own.
+
+TIP: Once a ticket has *less than 600 seconds*
+     before it expires the NFS client will automatically
+     switch to `sync` transfer to ensure data is transfered
+     before your ticket expires and you lose read/write access.
+
+NOTE: You must restart the NFS services if you change this file.
+      `systemctl restart nfs-client.target` should be sufficient.
+
+=== gssproxy.conf ===
+
+The default configuration shipped with the release is sufficient for
+most use cases.  It probably looks as follows:
+
++/etc/gssproxy/gssproxy.conf+
+--------------------------------------------
+[gssproxy]
+--------------------------------------------
+
++/etc/gssproxy/99-nfs-client.conf+
+--------------------------------------------
+[service/nfs-client]
+  mechs = krb5
+  cred_store = keytab:/etc/krb5.keytab
+  cred_store = ccache:FILE:/var/lib/gssproxy/clients/krb5cc_%U
+  cred_store = client_keytab:/var/lib/gssproxy/clients/%U.keytab
+  cred_usage = initiate
+  allow_any_uid = yes
+  trusted = yes
+  euid = 0
+--------------------------------------------
+
+=== nfsmount.conf ===
+
+The +nfs-utils+ package provides +/etc/nfsmount.conf+.
+
+This file provides the default settings used by the NFS client.
+
+It is recommended that you make your +[ NFSMount_Global_Options ]+
+section match the one provided below for best results.
+
+--------------------------------------------
+[ NFSMount_Global_Options ]
+# by default use NFSv4 over TCP, can fallback to v3 or UDP
+#  can override or setup fallback for specific shares
+Defaultvers=4
+Defaultproto=tcp
+
+# Set mount options 'hard,bg,intr,cto,timeo=600' by default
+Hard=True
+Background=True
+Intr=True
+Cto=True
+Timeo=600
+--------------------------------------------
+
+== Mounting NFS Shares ==
+
+With the required settings in place for an NFS client, you should now
+be able to mount a Kerberized NFS share.
+
+=== Example Shares ===
+
+TIP: If your system followed the suggested guidelines, a number of common
+     options are now enabled by default.  You can use these lines to mount
+     common Fermilab Kerberized NFS shares.
+
+NOTE: The sample entries here will force NFSv4 over TCP.
+      Fermilab's Kerberized NFS shares should not use NFSv3 or UDP.
+
+--------------------------------------------
+homesrv01.fnal.gov:/home        /nashome        nfs    sec=krb5,nfsvers=4,proto=tcp,nosuid    0 0
+homesrv01.fnal.gov:/users       /naswinusers    nfs    sec=krb5,nfsvers=4,proto=tcp,nosuid    0 0
+filesrv01.fnal.gov:/web         /web            nfs    sec=krb5,nfsvers=4,proto=tcp,nosuid    0 0
+filesrv01.fnal.gov:/publicweb   /publicweb      nfs    sec=krb5,nfsvers=4,proto=tcp,nosuid    0 0
+filesrv01.fnal.gov:/ftp         /nasftp         nfs    sec=krb5,nfsvers=4,proto=tcp,nosuid    0 0
+filesrv01.fnal.gov:/Operations  /nasops         nfs    sec=krb5,nfsvers=4,proto=tcp,nosuid    0 0
+filesrv01.fnal.gov:/Projects    /nasprojects    nfs    sec=krb5,nfsvers=4,proto=tcp,nosuid    0 0
+filesrv01.fnal.gov:/SciSoft     /SciSoft        nfs    sec=krb5,nfsvers=4,proto=tcp,nosuid    0 0
+--------------------------------------------
+
+TIP: The initial mount may take some time as your system
+     will be starting several background services.
+
+== Troubleshooting ==
+
+=== `mount.nfs: an incorrect mount option was specified` ===
+
+Probably there is something wrong with one of the following:
+
+* Your Kerberos configuration
+* Your keytab
+* Your gssproxy configuration
+
+Please validate these are correct and run `systemctl restart nfs-client.target`
+
+=== Destroy Cached credentials ===
+
+Running `kdestroy -A` is a good start, but may not be enough.
+
+Your Kerberos credentials can be cached a number of places:
+* +/tmp/krb5cc*+
+* +/run/user/%U/krb5_ccache+
+* +/var/lib/gssproxy/clients/krb5cc*+
+* KCM (within the SSSD database +/var/lib/sss/secrets/secrets.ldb+)
+* Kernel +KEYRING+ (*USER* keyring and *NFS* keyring)
+
+==== nfs.conf context-timeout ====
+
+NOTE: The kernel *cannot* and *does not* renew tickets
+      on your behalf.  This would require an entire
+      kerberos subsystem to run within the kernel itself.
+
+To ensure the kernel is using the most recent ticket
+consider setting
+
+--------------------------------------------
+context-timeout=25252
+--------------------------------------------
+
+in the +[gssd]+ section, where *25252* is the maximum number of
+seconds before a kernel cached ticket is considered expired.
+The example value here is a little over 7 hours.
+
+WARNING: The lower you set this value the worse your
+         performance will be.
+         The higher you set this value the longer your
+         system will keep a Kerberos ticket in the Kernel.
+         Kernel cached tickets are not revoked when you logout.
+
+NOTE: Do not set this value to less than 600 seconds.
+      A value that low will result in a full session
+      reauthentication for every NFS request and put
+      all filesystem actions for all users as if the
+      filesystem was mounted `sync`.
+
+TIP: A setting of +context-timeout=0+ is the default.
+     With this setting, tickets will be cached until
+     the ticket reaches it's Kerberos expiration time.
+
+==== Remount the filesystem ====
+
+If you are the only user of the filesystem, sometimes the best way
+to clean the Kernel Cache is to unmount and then mount the
+Kerberized filesystem.
+
+NOTE: using `-o remount` will not clear the cache.
+
+////
+== Notes ==
+
+Useful links
+
+https://bugzilla.kernel.org/show_bug.cgi?id=93891
+https://bugzilla.linux-nfs.org/show_bug.cgi?id=343
+https://access.redhat.com/solutions/753853
+
+// `asciidoc -a data-uri -a icons -a toc txt.adoc`
+
+////
+
+// vim: set syntax=asciidoc:
+

@@ -226,6 +226,14 @@ TIP: The initial mount may take some time as your system
 
 == Special Considerations ==
 
+All automated jobs should use a dedicated non-personal user identity
+and dedicated Kerberos identity.
+
+Shared user accounts require planning and have a number of special cases
+that need to be considered.
+
+=== The Shared Accounts Problem ===
+
 With shared accounts there is the possibility of Kerberos NFS confusion
 as a user may end up with the incorrect principal used for NFS access.
 

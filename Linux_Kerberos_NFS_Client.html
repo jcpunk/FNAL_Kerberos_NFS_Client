@@ -2095,6 +2095,12 @@ qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC" />
 <div class="sect1">
 <h2 id="_special_considerations">Special Considerations</h2>
 <div class="sectionbody">
+<div class="paragraph"><p>All automated jobs should use a dedicated non-personal user identity
+and dedicated Kerberos identity.</p></div>
+<div class="paragraph"><p>Shared user accounts require planning and have a number of special cases
+that need to be considered.</p></div>
+<div class="sect2">
+<h3 id="_the_shared_accounts_problem">The Shared Accounts Problem</h3>
 <div class="paragraph"><p>With shared accounts there is the possibility of Kerberos NFS confusion
 as a user may end up with the incorrect principal used for NFS access.</p></div>
 <div class="paragraph"><p>To mitigate this, we have a set of suggested methods for setting up shared
@@ -2102,6 +2108,7 @@ accounts to access Kerberized NFS mounts.</p></div>
 <div class="paragraph"><p>Following these guidelines will permit you to login with your Kerberos
 credentials, but use a specific set of credentials for the Kerberized
 NFS operations.</p></div>
+</div>
 <div class="sect2">
 <h3 id="_setup_a_hnas_group">Setup a HNAS Group</h3>
 <div class="paragraph"><p>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -3128,7 +3135,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-06-01 12:29:30 CDT
+ 2020-06-01 12:41:52 CDT
 </div>
 </div>
 </body>

@@ -229,8 +229,9 @@ TIP: The initial mount may take some time as your system
 All automated jobs should use a dedicated non-personal user identity
 and dedicated Kerberos identity.
 
-Shared user accounts require planning and have a number of special cases
-that need to be considered.
+A *Shared Account NFS* account is one in which multiple Kerberos
+identities are used when talking to the NFS server.  An account
+with a single user, but multiple Kerberos principals *is* a shared account.
 
 === The Shared Accounts Problem ===
 
@@ -274,10 +275,6 @@ TIP: Fermilab EL7 or later users can use this +makehostkeys+ command:
      to create a client.keytab in their home directory.
 
 === Shared Account NFS Options ===
-
-A *Shared Account NFS* account is one in which multiple Kerberos
-identities are used when talking to the NFS server.  An account
-with a single user, but multiple Kerberos principals *is* a shared account.
 
 There are a few ways to setup the acquisition of Kerberos tokens
 for NFS accounts.

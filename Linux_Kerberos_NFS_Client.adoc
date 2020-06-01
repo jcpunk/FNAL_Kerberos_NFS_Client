@@ -139,9 +139,11 @@ WARNING: The kernel cache of your Kerberos ticket
          section for more information.
 
 NOTE: For the +rpc.gssd+ daemon uses the system keytab (ie +/etc/krb5.keytab+)
-      to access the NFS share as user +root+.
-      *This makes the +root+ account a shared NFS account* if you
-      are going to access Kerberized NFS as +root+ using
+      to access the NFS share as user +root+. +
+      +
+      *This makes the +root+ account a xref:_special_considerations[shared NFS account]*. +
+      +
+      If you are going to access Kerberized NFS as +root+ using
       an alternate principal - such as your own.
 
 TIP: Once a ticket has *less than 600 seconds*

@@ -238,6 +238,8 @@ A *Shared Account NFS* account is one in which multiple Kerberos
 identities are used when talking to the NFS server.  If an account
 has a single User ID, but multiple Kerberos principals *is* a shared account.
 
+Please read this entire section before beginning this process.
+
 === The Shared Accounts Problem ===
 
 With shared accounts there is the possibility of Kerberos NFS confusion
@@ -282,7 +284,8 @@ TIP: Fermilab EL7 or later users can use this +makehostkeys+ command:
 === Shared Account NFS Options ===
 
 There are a few ways to setup the acquisition of Kerberos tokens
-for NFS accounts.
+for NFS accounts.  Each of these methods uses the +client.keytab+ you
+created in the previous section.
 
 * +gssproxy+
 * +~/.k5identity+

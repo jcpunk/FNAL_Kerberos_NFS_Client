@@ -84,6 +84,9 @@ WARNING: Kerberos is a time sensitive protocol.  Your system must
 Your Kerberos Keytab (+/etc/krb5.keytab+) is unique to your system
 and not provided by any system packages.
 
+After any changes to your system keytab you must restart the
+NFS services.  `systemctl restart nfs-client.target` should be sufficient.
+
 WARNING: Your +/etc/krb5.keytab+ must be owned by the +root+ user and
          not accessible to any other user or group.  Most Kerberos
          applications will validate this before attempting to use
@@ -92,7 +95,7 @@ WARNING: Your +/etc/krb5.keytab+ must be owned by the +root+ user and
 NOTE: For SELinux systems, if your keytab is not physically located
       in +/etc/krb5.keytab+ you must ensure it is accessible to
       +rpc.gssd+.  A link from +/etc/krb5.keytab+ to the alternate
-      location is required.  The directory path must be something
+      location is *required*.  The directory path must be something
       it can traverse and the keytab itself must be of type +krb5_keytab_t+. +
       +
       Running `chcon -t krb5_keytab_t $(readlink -f /etc/krb5.keytab)`

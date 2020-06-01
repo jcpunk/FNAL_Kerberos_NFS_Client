@@ -1356,6 +1356,8 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
 <h3 id="_krb5_keytab">krb5.keytab</h3>
 <div class="paragraph"><p>Your Kerberos Keytab (<code>/etc/krb5.keytab</code>) is unique to your system
 and not provided by any system packages.</p></div>
+<div class="paragraph"><p>After any changes to your system keytab you must restart the
+NFS services.  <code>systemctl restart nfs-client.target</code> should be sufficient.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -1476,7 +1478,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 <td class="content">For SELinux systems, if your keytab is not physically located
       in <code>/etc/krb5.keytab</code> you must ensure it is accessible to
       <code>rpc.gssd</code>.  A link from <code>/etc/krb5.keytab</code> to the alternate
-      location is required.  The directory path must be something
+      location is <strong>required</strong>.  The directory path must be something
       it can traverse and the keytab itself must be of type <code>krb5_keytab_t</code>.<br />
      <br />
       Running <code>chcon -t krb5_keytab_t $(readlink -f /etc/krb5.keytab)</code>
@@ -3133,7 +3135,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-06-01 13:12:22 CDT
+ 2020-06-01 13:15:07 CDT
 </div>
 </div>
 </body>

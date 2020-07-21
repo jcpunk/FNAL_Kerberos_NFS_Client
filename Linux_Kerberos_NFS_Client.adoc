@@ -348,7 +348,7 @@ It must be owned by your user and not readable to any other user.
 TIP: This process must be done on each system using the NFS share
      for each shared user.
 
-NOTE: Your System's Administrator may need to do this step for you on SL7.
+NOTE: Your System's Administrator may need to do this step for you on EL8.
       Ensure ownership is correct and permissions on the keytab are +0600+.
       You should set +/var/kerberos/krb5/user/$\{EUID}/+ to +0700+.
 

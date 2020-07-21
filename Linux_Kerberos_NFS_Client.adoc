@@ -119,20 +119,6 @@ The +nfs-utils+ package provides +/etc/nfs.conf+.
 
 This file controls the settings of the NFS services.
 
-It is recommended that you make your +[gssd]+ section
-match the one provided below for best results.
-
---------------------------------------------
-[gssd]
-use-memcache=yes
-use-gss-proxy=yes
-use-machine-creds=yes
---------------------------------------------
-
-NOTE: `/etc/sysconfig/nfs` is deprecated.  Anything
-      you've set there should be moved to their new
-      locations in +/etc/nfs.conf+ or +/etc/modprobe.d/+.
-
 WARNING: The kernel cache of your Kerberos ticket
          is not linked to your user space Kerberos
          ticket.  See the xref:_troubleshooting[Troubleshooting]
@@ -151,8 +137,42 @@ TIP: Once a ticket has *less than 600 seconds*
      switch to `sync` transfer to ensure data is transfered
      before your ticket expires and you lose read/write access.
 
-NOTE: You must restart the NFS services if you change this file.
+NOTE: You must restart the NFS services if you change the configuration.
       `systemctl restart nfs-client.target` should be sufficient.
+
+==== nfs-utils >= 2.0 ====
+It is recommended that you make your +[gssd]+ section
+match the one provided below for best results.
+
+--------------------------------------------
+[gssd]
+use-memcache=yes
+use-gss-proxy=yes
+use-machine-creds=yes
+--------------------------------------------
+
+NOTE: `/etc/sysconfig/nfs` is deprecated.  Anything
+      you've set there should be moved to their new
+      locations in +/etc/nfs.conf+ or +/etc/modprobe.d/+.
+
+==== nfs-utils < 2.0 ====
+It is recommended that you make your +[gssd]+ section
+match the one provided below for best results.
+
+--------------------------------------------
+[gssd]
+use-memcache=yes
+use-machine-creds=yes
+--------------------------------------------
+
+Additionally, for this older version of `nfs-utils` you should
+set the following in `/etc/sysconfig/nfs`:
+
+--------------------------------------------
+GSS_USE_PROXY='yes'
+--------------------------------------------
+
+This file is deprecated in `nfs-utils` >= 2.0
 
 === gssproxy.conf ===
 

@@ -1174,6 +1174,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 <h3 id="_krb5_conf">krb5.conf</h3>
 <div class="paragraph"><p>The <code>krb5-libs</code> package provides <code>/etc/krb5.conf</code>.</p></div>
 <div class="paragraph"><p>This file controls how Kerberos authentication functions on your system.</p></div>
+<div class="paragraph"><p>Follow the <a href="https://authentication.fnal.gov/krb5conf/">official Fermilab guidence</a> for setting up this file.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -1227,7 +1228,8 @@ Pvx+P8FgkGAw+OWfD7gj94RG13U0TSOdTpNOp8lMbmQ0TcvbArrrK1mW8Xg8eL3e7BLB5/N9dSc0
 uSP3jMwwjKy4G3AXwB0ugAsx5YzMndW//DOy3OFMjGwrxrKs7NX9LBfAneFFUcxec6rU5zqpvCqA
 qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC" />
 </td>
-<td class="content">Follow the official Fermilab guidence for setting up this file.</td>
+<td class="content">Systems with the Fermilab provided package repos can install
+     <code>fermilab-conf_kerberos</code> to get your system automatically configured.</td>
 </tr></table>
 </div>
 <div class="admonitionblock">
@@ -2723,7 +2725,7 @@ lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
 zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
 PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 </td>
-<td class="content">Your System&#8217;s Administrator may need to do this step for you on SL7.
+<td class="content">Your System&#8217;s Administrator may need to do this step for you on EL8.
       Ensure ownership is correct and permissions on the keytab are <code>0600</code>.
       You should set <code>/var/kerberos/krb5/user/${EUID}/</code> to <code>0700</code>.</td>
 </tr></table>
@@ -3161,7 +3163,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-07-21 09:13:44 CDT
+ 2020-07-22 09:15:49 CDT
 </div>
 </div>
 </body>

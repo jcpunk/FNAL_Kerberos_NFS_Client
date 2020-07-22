@@ -69,7 +69,10 @@ The +krb5-libs+ package provides +/etc/krb5.conf+.
 
 This file controls how Kerberos authentication functions on your system.
 
-TIP: Follow the official Fermilab guidence for setting up this file.
+Follow the https://authentication.fnal.gov/krb5conf/[official Fermilab guidence] for setting up this file.
+
+TIP: Systems with the Fermilab provided package repos can install
+     `fermilab-conf_kerberos` to get your system automatically configured.
 
 NOTE: Linux systems should ensure that you do not have explicit mappings
       for +homesrv01.fnal.gov+, +filesrv01.fnal.gov+, or +filesrv-app.fnal.gov+

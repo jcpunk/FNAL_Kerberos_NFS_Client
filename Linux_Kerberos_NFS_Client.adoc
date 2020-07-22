@@ -139,7 +139,7 @@ TIP: Once a ticket has *less than 600 seconds*
      before your ticket expires and you lose read/write access.
 
 NOTE: You must restart the NFS services if you change the configuration.
-      `systemctl restart nfs-client.target` should be sufficient.
+      `systemctl restart rpc-gssd.service gssproxy.service` should be sufficient.
 
 ==== nfs-utils >= 2.0 ====
 It is recommended that you make your +[gssd]+ section

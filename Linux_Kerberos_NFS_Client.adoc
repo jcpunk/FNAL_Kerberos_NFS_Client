@@ -111,8 +111,6 @@ Kerberized NFS shares.
 
 The traditional process for getting a Fermilab Keytab provides this.
 
-== Suggested Configuration Settings ==
-
 === nfs.conf ===
 
 The +nfs-utils+ package provides +/etc/nfs.conf+.
@@ -173,6 +171,8 @@ GSS_USE_PROXY='yes'
 --------------------------------------------
 
 This file is deprecated in `nfs-utils` >= 2.0
+
+== Expected Configuration Settings ==
 
 === gssproxy.conf ===
 

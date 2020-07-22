@@ -1111,8 +1111,8 @@ lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
 zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
 PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 </td>
-<td class="content">You must restart the NFS services if you change this file.
-      <code>systemctl restart nfs-client.target</code> should be sufficient.</td>
+<td class="content">You must restart the NFS ID Map services if you change this file.
+      <code>systemctl restart nfs-idmapd.service</code> should be sufficient.</td>
 </tr></table>
 </div>
 <div class="admonitionblock">
@@ -1869,7 +1869,7 @@ match the one provided below for best results.</p></div>
 use-memcache=yes
 use-machine-creds=yes</code></pre>
 </div></div>
-<div class="paragraph"><p>Additionally, for this older version of <code>nfs-utils</code> you should
+<div class="paragraph"><p>Additionally, for this older version of <code>nfs-utils</code> you must
 set the following in <code>/etc/sysconfig/nfs</code>:</p></div>
 <div class="listingblock">
 <div class="content">
@@ -3163,7 +3163,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-07-22 09:49:00 CDT
+ 2020-07-22 10:11:42 CDT
 </div>
 </div>
 </body>

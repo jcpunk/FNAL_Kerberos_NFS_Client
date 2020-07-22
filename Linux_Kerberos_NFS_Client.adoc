@@ -56,8 +56,8 @@ Domain = fnal.gov
 Local-Realms = FNAL.GOV
 --------------------------------------------
 
-NOTE: You must restart the NFS services if you change this file.
-      `systemctl restart nfs-client.target` should be sufficient.
+NOTE: You must restart the NFS ID Map services if you change this file.
+      `systemctl restart nfs-idmapd.service` should be sufficient.
 
 NOTE: If your system is on site and has a hostname ending in +fnal.gov+,
       then these settings are not required.  However, it is best practice
@@ -166,7 +166,7 @@ use-memcache=yes
 use-machine-creds=yes
 --------------------------------------------
 
-Additionally, for this older version of `nfs-utils` you should
+Additionally, for this older version of `nfs-utils` you must
 set the following in `/etc/sysconfig/nfs`:
 
 --------------------------------------------

@@ -2818,6 +2818,16 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 <h2 id="_troubleshooting">Troubleshooting</h2>
 <div class="sectionbody">
 <div class="sect2">
+<h3 id="_cron_says_code_error_chdir_failed_nashome_e_exampleuser_key_has_expired_code">cron says <code>ERROR chdir failed (/nashome/e/exampleuser): Key has expired</code></h3>
+<div class="paragraph"><p>￼
+In this instance you should probably add the following to <code>/etc/crontab</code>:</p></div>
+<div class="paragraph"><p>---
+HOME=/run/user
+---</p></div>
+<div class="paragraph"><p>The cron daemon is attempting to access your home area and you do not have
+a user keytab configured.</p></div>
+</div>
+<div class="sect2">
 <h3 id="_code_mount_nfs_an_incorrect_mount_option_was_specified_code"><code>mount.nfs: an incorrect mount option was specified</code></h3>
 <div class="paragraph"><p>Probably there is something wrong with one of the following:</p></div>
 <div class="ulist"><ul>
@@ -3163,7 +3173,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==" />
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-07-22 10:11:42 CDT
+ 2020-07-28 14:17:33 CDT
 </div>
 </div>
 </body>

@@ -389,6 +389,17 @@ NOTE: There is a known bug with EL8 where +~/.k5identity+ is not
 
 == Troubleshooting ==
 
+=== cron says `ERROR chdir failed (/nashome/e/exampleuser): Key has expired` ===
+￼
+In this instance you should probably add the following to `/etc/crontab`:
+
+---
+HOME=/run/user
+---
+
+The cron daemon is attempting to access your home area and you do not have
+a user keytab configured.
+
 === `mount.nfs: an incorrect mount option was specified` ===
 
 Probably there is something wrong with one of the following:

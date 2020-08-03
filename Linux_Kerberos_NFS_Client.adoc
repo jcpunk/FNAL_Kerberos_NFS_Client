@@ -224,6 +224,19 @@ Cto=True
 Timeo=600
 --------------------------------------------
 
+==== nconnect ====
+
+EL8 systems with +kernel+ >= 4.18.0-221.el8 and
++nfs-utils+ >= 2.3.3-35.el8 can add the mount option
+`nconnect=X` where +X+ is a number such as +4+.
+
+On systems with a large number of NFSv4 users, this should increase
+performance at the cost of additional memory consumption.  This option
+should be set only on NFS volumes with a number of parallel users.
+
+Systems that do not support `nconnect=X` whill issue an error mounting
+the NFS volume.
+
 == Mounting NFS Shares ==
 
 With the required settings in place for an NFS client, you should now
@@ -261,6 +274,9 @@ A *Shared Account NFS* account is one in which multiple Kerberos
 identities are used when talking to the NFS server.  If an account
 has a single User ID, but multiple Kerberos principals *is* a shared account.
 If you are using Overlay User IDs, those are considered a single shared account.
+
+Our process requires a single 'Shared Account NFS Kerberos Mapping' configured
+for the shared account.
 
 Please read this entire section before beginning this process.
 
@@ -305,22 +321,7 @@ TIP: Fermilab EL7 or later users can use this +makehostkeys+ command:
      `makehostkeys -s exampleuser/cron -k ~/client.keytab`
      to create a +client.keytab+ in their home directory.
 
-=== Shared Account NFS Options ===
-
-There are a few ways to setup the acquisition of Kerberos tokens
-for NFS accounts.  Each of these methods uses the +client.keytab+ you
-created in the previous section.
-
-* +gssproxy+
-* +~/.k5identity+
-
-The use of +gssproxy+ is generally reliable, but will require work from
-your systems administrator.  This +gssproxy+ is the suggested approach.
-
-The use of +~/.k5identity+ can be mostly done without any involvement
-of your systems administrator.  This may not work in all cases.
-
-==== Shared Account NFS Option 1 - Setup +gssproxy+ ====
+==== Shared Account NFS Kerberos Mapping - +gssproxy+ ====
 
 NOTE: Your System's Administrator will need to do this step for you.
 
@@ -333,59 +334,6 @@ owned by +root+ and not readable to any other user.
 
 TIP: This process must be done on each system using the NFS share
      for each shared user.
-
-==== Shared Account NFS Option 2 - Setup +~/.k5identity+ ====
-
-WARNING: This process will not work with Heimdal Kerberos < *8.0*
-
-WARNING: This process will not work with MIT Kerberos < *1.16*
-
-WARNING: This process will not work with +nfs-utils+ < *2.3.1*
-
-The exact name of your client keytab is system specific.
-
-It follows the pattern: +/var/kerberos/krb5/user/$\{EUID}/client.keytab+
-
-It must be owned by your user and not readable to any other user.
-
-TIP: This process must be done on each system using the NFS share
-     for each shared user.
-
-NOTE: Your System's Administrator may need to do this step for you on EL8.
-      Ensure ownership is correct and permissions on the keytab are +0600+.
-      You should set +/var/kerberos/krb5/user/$\{EUID}/+ to +0700+.
-
-The +~/.k5identity+ file for the shared account should contain
-the following lines customized to match your keytab created above:
-
---------------------------------------
-##
-# Mappings to use /var/kerberos/krb5/user/${EUID}/client.keytab
-##
-
-# static Kerberos mapping for homesrv01.fnal.gov's nfs shares
-exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=homesrv01.fnal.gov service=nfs
-
-# static Kerberos mapping for filesrv01.fnal.gov's nfs shares
-exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=filesrv01.fnal.gov service=nfs
-
-# static Kerberos mapping for filesrv-app.fnal.gov's nfs shares
-exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=filesrv-app.fnal.gov service=nfs
---------------------------------------
-
-*or* _if you are not using other Kerberized NFS principals_:
-
---------------------------------------
-##
-# Mappings to use /var/kerberos/krb5/user/${EUID}/client.keytab
-##
-
-# static Kerberos mapping for ALL nfs shares at fnal.gov
-exampleuser/cron/testhost.fnal.gov@FNAL.GOV  host=*.fnal.gov service=nfs
---------------------------------------
-
-NOTE: There is a known bug with EL8 where +~/.k5identity+ is not
-      reviewed by +gssproxy+ when doing credential delegation.
 
 == Troubleshooting ==
 
@@ -400,6 +348,9 @@ HOME=/run/user
 The cron daemon is attempting to access your home area and you do not have
 a user keytab configured.
 
+Cron *should* be trying to use as much information as it can from your home
+area to define your user runtime environment.
+
 === `mount.nfs: an incorrect mount option was specified` ===
 
 Probably there is something wrong with one of the following:
@@ -408,7 +359,8 @@ Probably there is something wrong with one of the following:
 * Your keytab
 * Your gssproxy configuration
 
-Please validate these are correct and run `systemctl restart nfs-client.target`
+Please validate these are correct and run `systemctl restart nfs-client.target` or
+reboot the host.
 
 === Destroy Cached credentials ===
 
